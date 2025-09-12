@@ -236,10 +236,3 @@ Update CORS origins in the security middleware for production deployment
 5. Set up SSL/TLS certificates
 6. Configure proper logging and monitoring
 
-## 📞 Support
-
-For support and questions, please contact the development team or create an issue in the repository.
-
-## 📄 License
-
-This project is licensed under the ISC License.
