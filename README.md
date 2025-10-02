@@ -1,6 +1,5 @@
 # Tripitify API
 
-A comprehensive trip planning API built with Node.js, Express, TypeORM, and MySQL. This API provides secure user authentication, onboarding, and trip management functionality.
 
 ## 🚀 Features
 
@@ -240,9 +239,6 @@ Update CORS origins in the security middleware for production deployment
 1. Set `NODE_ENV=production` in your environment
 2. Configure production database credentials
 
-## 📞 Support
-
-For support and questions, please contact the development team or create an issue in the repository.
 
 ## 📄 License
 
