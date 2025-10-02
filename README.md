@@ -1,6 +1,6 @@
 # Tripitify API
 
-A  trip planning API built with Node.js, Express, TypeORM, and MySQL. This API provides secure user authentication, onboarding, and trip management functionality.
+A comprehensive trip planning API built with Node.js, Express, TypeORM, and MySQL. This API provides secure user authentication, onboarding, and trip management functionality.
 
 ## 🚀 Features
 
@@ -123,9 +123,11 @@ Once the server is running, access the interactive API documentation at:
 - `GET /api/onboarding/profile` - Get user profile
 - `PUT /api/onboarding/user-type` - Update user type
 - `PUT /api/onboarding/interests` - Update user interests
+- `PUT /api/onboarding/trip-purpose` - Update trip purpose
+- `PUT /api/onboarding/travel-preferences` - Update travel frequency and budget
+- `PUT /api/onboarding/planner-profile` - Update planner profile (for planners)
 - `POST /api/onboarding/complete` - Complete onboarding
 - `GET /api/onboarding/user-types` - Get all user types
-- `GET /api/onboarding/interests` - Get all interests
 
 ## 🔒 Authentication
 
@@ -229,12 +231,14 @@ Update CORS origins in the security middleware for production deployment
 
 ## 🚀 Deployment
 
+### Heroku Deployment Ready
+- ✅ No static IP restrictions (perfect for Heroku)
+- ✅ Environment variable configuration
+- ✅ CORS configured for production domains
+- ✅ Database connection pooling optimized
+
 1. Set `NODE_ENV=production` in your environment
 2. Configure production database credentials
-3. Set up proper CORS origins for your frontend
-4. Configure rate limiting for production traffic
-5. Set up SSL/TLS certificates
-6. Configure proper logging and monitoring
 
 ## 📞 Support
 

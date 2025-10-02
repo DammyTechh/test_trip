@@ -5,6 +5,7 @@ const {
   validate,
   userTypeSchema,
   interestsSchema,
+  travelPreferencesSchema,
   generalRateLimit
 } = require('../middlewares/validation.middleware');
 
@@ -130,7 +131,7 @@ router.put('/user-type', protect, validate(userTypeSchema), onboardingController
  *                 type: array
  *                 items:
  *                   type: integer
- *                 example: [1, 2, 3]
+ *                 example: [1, 2, 3, 4]
  *                 description: Array of interest IDs
  *     responses:
  *       200:
@@ -177,6 +178,110 @@ router.put('/user-type', protect, validate(userTypeSchema), onboardingController
  *                         $ref: '#/components/schemas/Interest'
  */
 router.put('/interests', protect, validate(interestsSchema), onboardingController.updateUserInterests);
+
+/**
+ * @swagger
+ * /api/onboarding/travel-preferences:
+ *   put:
+ *     summary: Update travel preferences (frequency and budget)
+ *     tags: [Onboarding]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - travelFrequency
+ *               - budgetRange
+ *             properties:
+ *               travelFrequency:
+ *                 type: string
+ *                 enum: ["Once a year", "2 - 3 times per year", "Weekly", "Monthly"]
+ *                 example: "2 - 3 times per year"
+ *               budgetRange:
+ *                 type: string
+ *                 enum: ["Under $500", "$500 - $1500", "$1500 - $3000", "Above $3000"]
+ *                 example: "$500 - $1500"
+ *     responses:
+ *       200:
+ *         description: Travel preferences updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: Invalid travel preferences
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.put('/travel-preferences', protect, validate(travelPreferencesSchema), onboardingController.updateTravelPreferences);
+
+/**
+ * @swagger
+ * /api/onboarding/trip-purpose:
+ *   put:
+ *     summary: Update trip purpose
+ *     tags: [Onboarding]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - tripPurpose
+ *             properties:
+ *               tripPurpose:
+ *                 type: string
+ *                 example: "Planning a vacation"
+ *     responses:
+ *       200:
+ *         description: Trip purpose updated successfully
+ */
+router.put('/trip-purpose', protect, onboardingController.updateTripPurpose);
+
+/**
+ * @swagger
+ * /api/onboarding/planner-profile:
+ *   put:
+ *     summary: Update planner profile (for planners only)
+ *     tags: [Onboarding]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               destinationSpecialties:
+ *                 type: string
+ *                 example: "Paris, Kenya"
+ *               planningExperienceYears:
+ *                 type: integer
+ *                 example: 3
+ *               planningRate:
+ *                 type: number
+ *                 example: 75.00
+ *     responses:
+ *       200:
+ *         description: Planner profile updated successfully
+ */
+router.put('/planner-profile', protect, onboardingController.updatePlannerProfile);
 
 /**
  * @swagger
@@ -237,6 +342,19 @@ router.post('/complete', protect, onboardingController.completeOnboarding);
  *                         $ref: '#/components/schemas/UserType'
  */
 router.get('/user-types', onboardingController.getUserTypes);
+
+/**
+ * @swagger
+ * /api/onboarding/trip-purposes:
+ *   get:
+ *     summary: Get all trip purposes
+ *     tags: [Onboarding]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Trip purposes retrieved successfully
+ */
+router.get('/trip-purposes', onboardingController.getTripPurposes);
 
 router.get('/interests', onboardingController.getInterests);
 

@@ -15,7 +15,7 @@ const protect = async (req, res, next) => {
       const userRepository = getUserRepository();
       const user = await userRepository.findOne({ 
         where: { user_id: decoded.id },
-        select: ['user_id', 'first_name', 'last_name', 'email', 'is_verified', 'is_onboarded', 'usertype_id']
+        select: ['user_id', 'first_name', 'last_name', 'email', 'phone_number', 'is_verified', 'is_onboarded', 'usertype_id', 'travel_frequency', 'budget_range']
       });
       
       if (!user) {

@@ -1,7 +1,6 @@
 const { DataSource } = require('typeorm');
 require('dotenv').config();
 
-
 const { User } = require('../entities/User');
 const { UserType } = require('../entities/UserType');
 const { Interest } = require('../entities/Interest');

@@ -1,6 +1,5 @@
 const { AppDataSource } = require('../config/database');
 
-
 const getUserRepository = () => AppDataSource.getRepository('User');
 const getUserTypeRepository = () => AppDataSource.getRepository('UserType');
 const getInterestRepository = () => AppDataSource.getRepository('Interest');

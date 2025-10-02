@@ -1,9 +1,10 @@
-const { getUserTypeRepository, getInterestRepository } = require('../models');
+const { getUserTypeRepository, getInterestRepository, getTripPurposeRepository } = require('../models');
 
 const seedDefaultData = async () => {
   try {
     const userTypeRepository = getUserTypeRepository();
     const interestRepository = getInterestRepository();
+    const tripPurposeRepository = getTripPurposeRepository();
 
     const userTypes = [
       {
@@ -36,36 +37,44 @@ const seedDefaultData = async () => {
 
     const interests = [
       {
-        name: 'Tourism',
-        description: 'General sightseeing and tourist activities',
+        name: 'Adventure & Outdoor',
+        description: 'Hiking, camping, extreme sports, outdoor adventures',
+        icon: 'adventure',
       },
       {
-        name: 'Cultural & History',
+        name: 'Culture & History',
         description: 'Museums, historical sites, cultural experiences',
-      },
-      {
-        name: 'Adventure',
-        description: 'Outdoor adventures, hiking, extreme sports',
+        icon: 'culture',
       },
       {
         name: 'Food & Dining',
-        description: 'Culinary experiences and local cuisine',
+        description: 'Culinary experiences, local cuisine, restaurants',
+        icon: 'food',
       },
       {
-        name: 'Shopping',
-        description: 'Shopping districts, markets, boutiques',
+        name: 'Nightlife & Entertainment',
+        description: 'Bars, clubs, entertainment venues, nightlife',
+        icon: 'nightlife',
       },
       {
-        name: 'Nightlife',
-        description: 'Bars, clubs, entertainment venues',
+        name: 'Photography',
+        description: 'Scenic spots, photo opportunities, landscapes',
+        icon: 'photography',
       },
       {
-        name: 'Business',
-        description: 'Business travel and conferences',
+        name: 'Wellness & Relaxation',
+        description: 'Spa, wellness, peaceful locations, meditation',
+        icon: 'wellness',
       },
       {
-        name: 'Relaxation',
-        description: 'Spa, wellness, peaceful locations',
+        name: 'Business Travel',
+        description: 'Business meetings, conferences, work travel',
+        icon: 'business',
+      },
+      {
+        name: 'Family Friendly',
+        description: 'Kid-friendly activities, family attractions',
+        icon: 'family',
       },
     ];
 
@@ -80,9 +89,44 @@ const seedDefaultData = async () => {
       }
     }
 
-    console.log('Default data seeded successfully');
+    
+    const tripPurposes = [
+      {
+        purpose_name: 'Planning a vacation',
+        description: 'Short-term stays for your holiday',
+        icon: 'vacation',
+      },
+      {
+        purpose_name: 'Looking for a temporary stay',
+        description: 'For work, study, or transitions',
+        icon: 'temporary',
+      },
+      {
+        purpose_name: 'Considering a relocation',
+        description: 'Find a new place to call home',
+        icon: 'relocation',
+      },
+      {
+        purpose_name: 'Just exploring',
+        description: 'Browse and see what\'s possible',
+        icon: 'exploring',
+      },
+    ];
+
+    for (const purpose of tripPurposes) {
+      const existingPurpose = await tripPurposeRepository.findOne({ where: { purpose_name: purpose.purpose_name } });
+      if (!existingPurpose) {
+        await tripPurposeRepository.save({
+          ...purpose,
+          created_at: new Date(),
+          updated_at: new Date(),
+        });
+      }
+    }
+
+    console.log('✅ Default data seeded successfully');
   } catch (error) {
-    console.error('Error seeding default data:', error);
+    console.error('❌ Error seeding default data:', error);
   }
 };
 

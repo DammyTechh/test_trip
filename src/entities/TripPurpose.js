@@ -12,6 +12,16 @@ const TripPurpose = new EntitySchema({
     purpose_name: {
       type: 'varchar',
       length: 100,
+      nullable: false,
+    },
+    description: {
+      type: 'varchar',
+      length: 255,
+      nullable: true,
+    },
+    icon: {
+      type: 'varchar',
+      length: 100,
       nullable: true,
     },
     created_at: {

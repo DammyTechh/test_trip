@@ -54,6 +54,10 @@ const options = {
               format: 'email',
               description: 'User email address',
             },
+            phone_number: {
+              type: 'string',
+              description: 'User phone number',
+            },
             is_verified: {
               type: 'boolean',
               description: 'Email verification status',
@@ -65,6 +69,14 @@ const options = {
             usertype_id: {
               type: 'integer',
               description: 'User type identifier',
+            },
+            travel_frequency: {
+              type: 'string',
+              description: 'How often user travels',
+            },
+            budget_range: {
+              type: 'string',
+              description: 'User budget range for trips',
             },
           },
         },
@@ -104,6 +116,11 @@ const options = {
               type: 'string',
               maxLength: 255,
               description: 'Interest description',
+            },
+            icon: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Interest icon identifier',
             },
           },
         },

@@ -9,8 +9,7 @@ const errorHandler = require('./src/middlewares/errorHandler.middleware');
 const {
   corsOptions,
   securityHeaders,
-  sanitizeInput,
-  ipWhitelist
+  sanitizeInput
 } = require('./src/middlewares/security.middleware');
 const cors = require('cors');
 const { swaggerUi, specs } = require('./src/config/swagger');
@@ -19,7 +18,6 @@ require('dotenv').config();
 const app = express();
 app.use(securityHeaders);
 app.use(cors(corsOptions));
-app.use(ipWhitelist);
 app.use(sanitizeInput);
 
 app.use(express.json());
