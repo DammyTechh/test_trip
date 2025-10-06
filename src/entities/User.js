@@ -48,9 +48,57 @@ const User = new EntitySchema({
       length: 255,
       nullable: true,
     },
+    verification_code: {
+      type: 'varchar',
+      length: 6,
+      nullable: true,
+    },
+    verification_expires: {
+      type: 'datetime',
+      nullable: true,
+    },
     is_onboarded: {
       type: 'boolean',
       default: false,
+    },
+    travel_frequency: {
+      type: 'varchar',
+      length: 50,
+      nullable: true,
+    },
+    budget_range: {
+      type: 'varchar',
+      length: 50,
+      nullable: true,
+    },
+    trip_purpose: {
+      type: 'varchar',
+      length: 100,
+      nullable: true,
+    },
+    destination_specialties: {
+      type: 'text',
+      nullable: true,
+    },
+    planning_experience_years: {
+      type: 'int',
+      nullable: true,
+    },
+    planning_rate: {
+      type: 'decimal',
+      precision: 10,
+      scale: 2,
+      nullable: true,
+    },
+    social_provider: {
+      type: 'varchar',
+      length: 50,
+      nullable: true,
+    },
+    social_id: {
+      type: 'varchar',
+      length: 255,
+      nullable: true,
     },
     created_at: {
       type: 'datetime',

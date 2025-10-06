@@ -11,7 +11,7 @@ const validate = (schema) => {
   };
 };
 
-// Enhanced validation schemas with better security
+
 const registerSchema = joi.object({
   firstName: joi.string()
     .min(2)
@@ -51,6 +51,13 @@ const registerSchema = joi.object({
       'string.max': 'Password cannot exceed 128 characters',
       'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
     }),
+  phoneNumber: joi.string()
+    .pattern(/^[\+]?[1-9][\d]{0,15}$/)
+    .optional()
+    .allow('')
+    .messages({
+      'string.pattern.base': 'Please provide a valid phone number'
+    }),
 });
 
 const loginSchema = joi.object({
@@ -67,6 +74,34 @@ const loginSchema = joi.object({
     .required()
     .messages({
       'string.empty': 'Password is required'
+    }),
+});
+
+const verifyEmailSchema = joi.object({
+  email: joi.string()
+    .email({ tlds: { allow: false } })
+    .max(255)
+    .required()
+    .messages({
+      'string.email': 'Please provide a valid email address'
+    }),
+  code: joi.string()
+    .length(6)
+    .pattern(/^\d{6}$/)
+    .required()
+    .messages({
+      'string.length': 'Verification code must be 6 digits',
+      'string.pattern.base': 'Verification code must contain only numbers'
+    }),
+});
+
+const resendVerificationSchema = joi.object({
+  email: joi.string()
+    .email({ tlds: { allow: false } })
+    .max(255)
+    .required()
+    .messages({
+      'string.email': 'Please provide a valid email address'
     }),
 });
 
@@ -93,6 +128,21 @@ const interestsSchema = joi.object({
       'array.min': 'At least one interest must be selected',
       'array.max': 'Cannot select more than 10 interests',
       'array.unique': 'Duplicate interests are not allowed'
+    }),
+});
+
+const travelPreferencesSchema = joi.object({
+  travelFrequency: joi.string()
+    .valid('Once a year', '2 - 3 times per year', 'Weekly', 'Monthly')
+    .required()
+    .messages({
+      'any.only': 'Travel frequency must be one of: Once a year, 2 - 3 times per year, Weekly, Monthly'
+    }),
+  budgetRange: joi.string()
+    .valid('Under $500', '$500 - $1500', '$1500 - $3000', 'Above $3000')
+    .required()
+    .messages({
+      'any.only': 'Budget range must be one of: Under $500, $500 - $1500, $1500 - $3000, Above $3000'
     }),
 });
 
@@ -138,6 +188,7 @@ const changePasswordSchema = joi.object({
       'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
     }),
 });
+
 const rateLimit = require('express-rate-limit');
 
 const createRateLimit = (windowMs, max, message) => {
@@ -153,29 +204,29 @@ const createRateLimit = (windowMs, max, message) => {
   });
 };
 
-// Enhanced rate limiting with different tiers
+
 const authRateLimit = createRateLimit(
-  15 * 60 * 1000, // 15 minutes
-  5, // 5 attempts per window
+  15 * 60 * 1000, 
+  5, 
   'Too many authentication attempts, please try again in 15 minutes.'
 );
 
 const generalRateLimit = createRateLimit(
-  15 * 60 * 1000, // 15 minutes
-  100, // 100 requests per window
+  15 * 60 * 1000, 
+  100, 
   'Too many requests, please try again in 15 minutes.'
 );
 
 const strictRateLimit = createRateLimit(
-  15 * 60 * 1000, // 15 minutes
-  10, // 10 requests per window
+  15 * 60 * 1000, 
+  10, 
   'Too many requests to this endpoint, please try again in 15 minutes.'
 );
 
-// Password reset specific rate limit
+
 const passwordResetRateLimit = createRateLimit(
-  60 * 60 * 1000, // 1 hour
-  3, // 3 attempts per hour
+  60 * 60 * 1000, 
+  3, 
   'Too many password reset attempts, please try again in 1 hour.'
 );
 
@@ -183,8 +234,11 @@ module.exports = {
   validate,
   registerSchema,
   loginSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
   userTypeSchema,
   interestsSchema,
+  travelPreferencesSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
   changePasswordSchema,

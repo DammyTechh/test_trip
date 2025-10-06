@@ -9,7 +9,9 @@ const {
   forgotPasswordSchema,
   resetPasswordSchema,
   changePasswordSchema,
-  passwordResetRateLimit
+  passwordResetRateLimit,
+  verifyEmailSchema,
+  resendVerificationSchema
 } = require('../middlewares/validation.middleware');
 
 const router = Router();
@@ -44,20 +46,23 @@ const router = Router();
  *                 type: string
  *                 minLength: 2
  *                 maxLength: 45
- *                 example: "John"
+ *                 example: "Benjamin"
  *               lastName:
  *                 type: string
  *                 minLength: 2
  *                 maxLength: 45
- *                 example: "Doe"
+ *                 example: "Adeyemi"
  *               email:
  *                 type: string
  *                 format: email
- *                 example: "john.doe@example.com"
+ *                 example: "benjamin.adeyemi@email.com"
  *               password:
  *                 type: string
  *                 minLength: 8
  *                 example: "SecurePass123!"
+ *               phoneNumber:
+ *                 type: string
+ *                 example: "+1 (555) 555-0188"
  *     responses:
  *       201:
  *         description: Registration successful
@@ -89,17 +94,29 @@ router.post('/register', authRateLimit, validate(registerSchema), authController
 /**
  * @swagger
  * /api/auth/verify-email:
- *   get:
- *     summary: Verify user email
+ *   post:
+ *     summary: Verify user email with 6-digit code
  *     tags: [Authentication]
  *     security: []
- *     parameters:
- *       - in: query
- *         name: token
- *         required: true
- *         schema:
- *           type: string
- *         description: Email verification token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - code
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "benjamin.adeyemi@email.com"
+ *               code:
+ *                 type: string
+ *                 minLength: 6
+ *                 maxLength: 6
+ *                 example: "123456"
  *     responses:
  *       200:
  *         description: Email verified successfully
@@ -108,13 +125,55 @@ router.post('/register', authRateLimit, validate(registerSchema), authController
  *             schema:
  *               $ref: '#/components/schemas/Success'
  *       400:
- *         description: Invalid verification token
+ *         description: Invalid verification code
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/verify-email', authController.verifyEmail);
+router.post('/verify-email', authRateLimit, validate(verifyEmailSchema), authController.verifyEmail);
+
+/**
+ * @swagger
+ * /api/auth/resend-verification:
+ *   post:
+ *     summary: Resend verification code
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "benjamin.adeyemi@email.com"
+ *     responses:
+ *       200:
+ *         description: Verification code resent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: Account already verified
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/resend-verification', authRateLimit, validate(resendVerificationSchema), authController.resendVerification);
 
 /**
  * @swagger
@@ -136,7 +195,7 @@ router.get('/verify-email', authController.verifyEmail);
  *               email:
  *                 type: string
  *                 format: email
- *                 example: "john.doe@example.com"
+ *                 example: "benjamin.adeyemi@email.com"
  *               password:
  *                 type: string
  *                 example: "SecurePass123!"
@@ -204,7 +263,7 @@ router.post('/logout', authController.logout);
  *               email:
  *                 type: string
  *                 format: email
- *                 example: "john.doe@example.com"
+ *                 example: "benjamin.adeyemi@email.com"
  *     responses:
  *       200:
  *         description: Password reset email sent
@@ -304,11 +363,19 @@ router.post('/change-password', protect, validate(changePasswordSchema), authCon
 
 /**
  * @swagger
- * /api/auth/resend-verification:
+ * /api/auth/social/{provider}:
  *   post:
- *     summary: Resend verification email
+ *     summary: Social authentication (Google, Apple, Facebook)
  *     tags: [Authentication]
  *     security: []
+ *     parameters:
+ *       - in: path
+ *         name: provider
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [google, apple, facebook]
+ *         description: Social authentication provider
  *     requestBody:
  *       required: true
  *       content:
@@ -316,32 +383,38 @@ router.post('/change-password', protect, validate(changePasswordSchema), authCon
  *           schema:
  *             type: object
  *             required:
+ *               - socialId
  *               - email
+ *               - firstName
+ *               - lastName
  *             properties:
+ *               socialId:
+ *                 type: string
+ *                 description: Unique ID from social provider
  *               email:
  *                 type: string
  *                 format: email
- *                 example: "john.doe@example.com"
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               profilePicture:
+ *                 type: string
+ *                 description: Profile picture URL
  *     responses:
  *       200:
- *         description: Verification email resent
+ *         description: Social authentication successful
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Success'
+ *               $ref: '#/components/schemas/AuthResponse'
  *       400:
- *         description: Account already verified
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       404:
- *         description: User not found
+ *         description: Invalid social data
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/resend-verification', authController.resendVerification);
+router.post('/social/:provider', authController.socialAuth);
 
 module.exports = router;

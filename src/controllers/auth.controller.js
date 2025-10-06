@@ -14,7 +14,7 @@ const register = async (req, res) => {
     return successResponseMsg(
       res,
       201,
-      'Registration successful. Please check your email to verify your account.',
+      'Registration successful. Please check your email for verification code.',
       result.data,
     );
   } catch (error) {
@@ -25,14 +25,28 @@ const register = async (req, res) => {
 
 const verifyEmail = async (req, res) => {
   try {
-    const { token } = req.query;
-    const result = await authService.verifyEmail(token);
+    const { email, code } = req.body;
+    const result = await authService.verifyEmail(email, code);
     if (!result.success) {
       return errorResponseMsg(res, result.status, result.message);
     }
-    return successResponseMsg(res, 200, 'Email verified successfully. You can now log in.');
+    return successResponseMsg(res, 200, 'Email verified successfully. You can now log in.', result.data);
   } catch (error) {
     console.error('Verify email controller error:', error);
+    return errorResponseMsg(res, 500, 'An unexpected error occurred.');
+  }
+};
+
+const resendVerification = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = await authService.resendVerificationCode(email);
+    if (!result.success) {
+      return errorResponseMsg(res, result.status, result.message);
+    }
+    return successResponseMsg(res, 200, result.message);
+  } catch (error) {
+    console.error('Resend verification controller error:', error);
     return errorResponseMsg(res, 500, 'An unexpected error occurred.');
   }
 };
@@ -122,27 +136,42 @@ const changePassword = async (req, res) => {
   }
 };
 
-const resendVerification = async (req, res) => {
+const socialAuth = async (req, res) => {
   try {
-    const { email } = req.body;
-    const result = await authService.resendVerification(email);
-    if (!result.success) return errorResponseMsg(res, result.status, result.message);
-
-    return successResponseMsg(res, 200, "Verification email resent successfully");
+    const { provider } = req.params;
+    const socialData = req.body;
+    
+    if (!['google', 'apple', 'facebook'].includes(provider)) {
+      return errorResponseMsg(res, 400, 'Invalid social provider');
+    }
+    
+    const result = await authService.socialAuth(provider, socialData);
+    if (!result.success) {
+      return errorResponseMsg(res, result.status, result.message);
+    }
+    
+    return sessionSuccessResponseMsg(
+      res,
+      200,
+      'Social authentication successful.',
+      result.data.token,
+      result.data.user,
+    );
   } catch (error) {
-    console.error('Resend verification controller error:', error);
-    return errorResponseMsg(res, 500, "Unexpected error");
+    console.error('Social auth controller error:', error);
+    return errorResponseMsg(res, 500, 'An unexpected error occurred.');
   }
 };
 
 module.exports = {
   register,
   verifyEmail,
+  resendVerification,
   login,
+  socialAuth,
   refresh,
   logout,
   forgotPassword,
   resetPassword,
-  changePassword,
-  resendVerification
+  changePassword
 };

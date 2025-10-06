@@ -5,7 +5,7 @@ const errorHandler = (err, req, res, next) => {
   error.message = err.message;
   console.error(err);
 
- 
+  
   if (err.name === 'QueryFailedError') {
     if (err.code === 'ER_DUP_ENTRY') {
       const message = 'Duplicate field value entered';
@@ -26,17 +26,6 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name === 'ValidationError') {
     const message = Object.values(err.constraints || {}).join(', ') || 'Validation failed';
-    error = { message, statusCode: 400 };
-  }
-
-  
-  if (err.name === 'SequelizeValidationError') {
-    const message = err.errors.map(e => e.message).join(', ');
-    error = { message, statusCode: 400 };
-  }
-
-  if (err.name === 'SequelizeUniqueConstraintError') {
-    const message = 'Duplicate field value entered';
     error = { message, statusCode: 400 };
   }
 

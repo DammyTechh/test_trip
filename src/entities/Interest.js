@@ -19,6 +19,11 @@ const Interest = new EntitySchema({
       length: 255,
       nullable: true,
     },
+    icon: {
+      type: 'varchar',
+      length: 100,
+      nullable: true,
+    },
     created_at: {
       type: 'datetime',
       nullable: true,

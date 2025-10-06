@@ -4,19 +4,38 @@ const { errorResponseMsg } = require('../utils/response');
 
 const corsOptions = {
   origin: function (origin, callback) {
+   
     if (!origin) return callback(null, true);
 
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:8080',
-      process.env.FRONTEND_URL
+      'http://localhost:5173',
+      'http://localhost:4200',
+      process.env.FRONTEND_URL,
+    
+      /^https:\/\/.*\.vercel\.app$/,
+      /^https:\/\/.*\.netlify\.app$/,
+      /^https:\/\/.*\.herokuapp\.com$/,
     ].filter(Boolean);
 
-    if (allowedOrigins.includes(origin)) {
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (typeof allowedOrigin === 'string') {
+        return allowedOrigin === origin;
+      }
+      return allowedOrigin.test(origin);
+    });
+
+    if (isAllowed) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      
+      if (process.env.NODE_ENV === 'development') {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     }
   },
   credentials: true,
@@ -61,29 +80,8 @@ const sanitizeInput = (req, res, next) => {
   next();
 };
 
-const ipWhitelist = (req, res, next) => {
-  if (process.env.NODE_ENV !== 'production') {
-    return next();
-  }
-
-  const allowedIPs = process.env.ALLOWED_IPS ? process.env.ALLOWED_IPS.split(',') : [];
-
-  if (allowedIPs.length === 0) {
-    return next();
-  }
-
-  const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
-
-  if (allowedIPs.includes(clientIP)) {
-    next();
-  } else {
-    return errorResponseMsg(res, 403, 'Access denied from this IP address.');
-  }
-};
-
 module.exports = {
   corsOptions,
   securityHeaders,
   sanitizeInput,
-  ipWhitelist,
 };
