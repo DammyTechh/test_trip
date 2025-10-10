@@ -1,13 +1,13 @@
 const { Router } = require('express');
-const onboardingController = require('../controllers/onboarding.controller');
-const { protect } = require('../middlewares/auth.middleware');
+const onboardingController = require('./controllers/onboarding.controller');
+const { protect } = require('../../middlewares/auth.middleware');
 const {
   validate,
   userTypeSchema,
   interestsSchema,
   travelPreferencesSchema,
   generalRateLimit
-} = require('../middlewares/validation.middleware');
+} = require('../../middlewares/validation.middleware');
 
 const router = Router();
 

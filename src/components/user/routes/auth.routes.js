@@ -1,19 +1,22 @@
-const { Router } = require('express');
-const authController = require('../controllers/auth.controller');
-const { protect } = require('../middlewares/auth.middleware');
+const { Router } = require("express");
+const authController = require("../controllers/auth.controller");
+const { guard } = require("../../../middlewares/auth.middleware");
 const {
-  validate,
   registerSchema,
   loginSchema,
-  authRateLimit,
   forgotPasswordSchema,
   resetPasswordSchema,
-  changePasswordSchema,
-  passwordResetRateLimit,
   verifyEmailSchema,
-  resendVerificationSchema
-} = require('../middlewares/validation.middleware');
+  resendVerificationSchema,
+  changePasswordSchema,
+  tokenSchema,
+} = require("../validators/auth-schema");
 
+const {
+  authRateLimit,
+  passwordResetRateLimit,
+} = require("../../../middlewares/security.middleware");
+const { validate } = require("../../../middlewares/validate-request");
 const router = Router();
 
 /**
@@ -89,7 +92,12 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/register', authRateLimit, validate(registerSchema), authController.register);
+router.post(
+  "/register",
+  authRateLimit,
+  validate(registerSchema(), "body"),
+  authController.register
+);
 
 /**
  * @swagger
@@ -131,7 +139,12 @@ router.post('/register', authRateLimit, validate(registerSchema), authController
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/verify-email', authRateLimit, validate(verifyEmailSchema), authController.verifyEmail);
+router.post(
+  "/verify-email",
+  authRateLimit,
+  validate(verifyEmailSchema(), "body"),
+  authController.verifyEmail
+);
 
 /**
  * @swagger
@@ -173,7 +186,12 @@ router.post('/verify-email', authRateLimit, validate(verifyEmailSchema), authCon
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/resend-verification', authRateLimit, validate(resendVerificationSchema), authController.resendVerification);
+router.post(
+  "/resend-verification",
+  authRateLimit,
+  validate(resendVerificationSchema(), "body"),
+  authController.resendVerification
+);
 
 /**
  * @swagger
@@ -225,24 +243,12 @@ router.post('/resend-verification', authRateLimit, validate(resendVerificationSc
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/login', authRateLimit, validate(loginSchema), authController.login);
-
-/**
- * @swagger
- * /api/auth/logout:
- *   post:
- *     summary: User logout
- *     tags: [Authentication]
- *     security: []
- *     responses:
- *       200:
- *         description: Logout successful
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Success'
- */
-router.post('/logout', authController.logout);
+router.post(
+  "/login",
+  authRateLimit,
+  validate(loginSchema(), "body"),
+  authController.login
+);
 
 /**
  * @swagger
@@ -278,7 +284,12 @@ router.post('/logout', authController.logout);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/forgot-password', passwordResetRateLimit, validate(forgotPasswordSchema), authController.forgotPassword);
+router.post(
+  "/forgot-password",
+  passwordResetRateLimit,
+  validate(forgotPasswordSchema(), "body"),
+  authController.forgotPassword
+);
 
 /**
  * @swagger
@@ -318,7 +329,12 @@ router.post('/forgot-password', passwordResetRateLimit, validate(forgotPasswordS
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/reset-password', passwordResetRateLimit, validate(resetPasswordSchema), authController.resetPassword);
+router.post(
+  "/reset-password",
+  passwordResetRateLimit,
+  validate(resetPasswordSchema(), "body"),
+  authController.resetPassword
+);
 
 /**
  * @swagger
@@ -359,62 +375,13 @@ router.post('/reset-password', passwordResetRateLimit, validate(resetPasswordSch
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/change-password', protect, validate(changePasswordSchema), authController.changePassword);
+router.patch(
+  "/update-password",
+  validate(tokenSchema(), "headers"),
+  guard,
+  validate(changePasswordSchema(), "body"),
+  authController.changePassword
+);
 
-/**
- * @swagger
- * /api/auth/social/{provider}:
- *   post:
- *     summary: Social authentication (Google, Apple, Facebook)
- *     tags: [Authentication]
- *     security: []
- *     parameters:
- *       - in: path
- *         name: provider
- *         required: true
- *         schema:
- *           type: string
- *           enum: [google, apple, facebook]
- *         description: Social authentication provider
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - socialId
- *               - email
- *               - firstName
- *               - lastName
- *             properties:
- *               socialId:
- *                 type: string
- *                 description: Unique ID from social provider
- *               email:
- *                 type: string
- *                 format: email
- *               firstName:
- *                 type: string
- *               lastName:
- *                 type: string
- *               profilePicture:
- *                 type: string
- *                 description: Profile picture URL
- *     responses:
- *       200:
- *         description: Social authentication successful
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/AuthResponse'
- *       400:
- *         description: Invalid social data
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.post('/social/:provider', authController.socialAuth);
 
 module.exports = router;
