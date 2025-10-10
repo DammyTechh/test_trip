@@ -2,32 +2,33 @@ const onboardingService = require("../services/onboarding.service");
 
 const response = require("../../../utils/controller-response");
 
-const getUserProfile = async (req, res) => {
-  try {
-    const response = await onboardingService.getUserProfile(req?.user?.user_id);
-    const { statusCode, message, data } = response;
-    return response(res, statusCode, message, data);
-  } catch (error) {
-    console.error("Get user profile controller error:", error);
-    return response(res, 500, "An unexpected error occurred.");
+class OnboardingController {
+  static async getUserProfile(req, res) {
+    try {
+      const response = await onboardingService.getUserProfile(
+        req?.user?.user_id
+      );
+      const { statusCode, message, data } = response;
+      return response(res, statusCode, message, data);
+    } catch (error) {
+      console.error("Get user profile controller error:", error);
+      return response(res, 500, "An unexpected error occurred.");
+    }
   }
-};
+  static async updateUserType(req, res) {
+    try {
+      const userId = req.user.user_id;
+      const { userTypeId } = req.body;
+      if (!userTypeId) return response(res, 400, "User type ID is required.");
 
-const updateUserType = async (req, res) => {
-  try {
-    const userId = req.user.user_id;
-    const { userTypeId } = req.body;
-    if (!userTypeId) return response(res, 400, "User type ID is required.");
-
-    const result = await onboardingService.updateUserType(userId, userTypeId);
-    return response(res, 200, result.message);
-  } catch (error) {
-    console.error("Update user type controller error:", error);
-    return response(res, 500, "An unexpected error occurred.");
+      const result = await onboardingService.updateUserType(userId, userTypeId);
+      return response(res, 200, result.message);
+    } catch (error) {
+      console.error("Update user type controller error:", error);
+      return response(res, 500, "An unexpected error occurred.");
+    }
   }
-};
-
-const updateUserInterests = async (req, res) => {
+  static async updateUserInterests(req, res) {
   try {
     const userId = req.user.user_id;
     const { interestIds } = req.body;
@@ -52,7 +53,7 @@ const updateUserInterests = async (req, res) => {
   }
 };
 
-const updateTravelPreferences = async (req, res) => {
+static async updateTravelPreferences(req, res){
   try {
     const userId = req.user.user_id;
     const { travelFrequency, budgetRange } = req.body;
@@ -77,7 +78,7 @@ const updateTravelPreferences = async (req, res) => {
   }
 };
 
-const updateTripPurpose = async (req, res) => {
+static async updateTripPurpose(req, res) {
   try {
     const userId = req.user.user_id;
     const { tripPurpose } = req.body;
@@ -96,7 +97,7 @@ const updateTripPurpose = async (req, res) => {
   }
 };
 
-const updatePlannerProfile = async (req, res) => {
+static async updatePlannerProfile (req, res) {
   try {
     const userId = req.user.user_id;
     const plannerData = req.body;
@@ -112,7 +113,7 @@ const updatePlannerProfile = async (req, res) => {
   }
 };
 
-const completeOnboarding = async (req, res) => {
+static async completeOnboarding (req, res) {
   try {
     const userId = req.user.user_id;
     const result = await onboardingService.completeOnboarding(userId);
@@ -128,7 +129,7 @@ const completeOnboarding = async (req, res) => {
   }
 };
 
-const getUserTypes = async (req, res) => {
+static async  getUserTypes(req, res){
   try {
     const result = await onboardingService.getAllUserTypes();
 
@@ -143,7 +144,7 @@ const getUserTypes = async (req, res) => {
   }
 };
 
-const getInterests = async (req, res) => {
+static async getInterests(req, res) {
   try {
     const result = await onboardingService.getAllInterests();
     return response(res, 200, result.message, result.data);
@@ -153,7 +154,7 @@ const getInterests = async (req, res) => {
   }
 };
 
-const getTripPurposes = async (req, res) => {
+static async getTripPurposes(req, res) {
   try {
     const result = await onboardingService.getAllTripPurposes();
     return response(res, 200, result.message, result.data);
@@ -162,6 +163,10 @@ const getTripPurposes = async (req, res) => {
     return response(res, 500, "An unexpected error occurred.");
   }
 };
+}
+export default OnboardingController;
+
+
 
 module.exports = {
   getUserProfile,

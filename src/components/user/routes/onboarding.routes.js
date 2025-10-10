@@ -1,13 +1,15 @@
-const { Router } = require('express');
-const onboardingController = require('./controllers/onboarding.controller');
-const { protect } = require('../../middlewares/auth.middleware');
+const { Router } = require("express");
+const onboardingController = require("./controllers/onboarding.controller");
+const { protect } = require("../../middlewares/auth.middleware");
 const {
   validate,
   userTypeSchema,
   interestsSchema,
   travelPreferencesSchema,
-  generalRateLimit
-} = require('../../middlewares/validation.middleware');
+  generalRateLimit,
+} = require("../../middlewares/validation.middleware");
+const { guard } = require("../../../middlewares/auth.middleware");
+const { tokenSchema } = require("../validators/auth-schema");
 
 const router = Router();
 
@@ -59,7 +61,12 @@ router.use(generalRateLimit);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/profile', protect, onboardingController.getUserProfile);
+router.get(
+  "/profile",
+  validate(tokenSchema(), "headers"),
+  guard,
+  onboardingController.getUserProfile
+);
 
 /**
  * @swagger
@@ -108,7 +115,13 @@ router.get('/profile', protect, onboardingController.getUserProfile);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put('/user-type', protect, validate(userTypeSchema), onboardingController.updateUserType);
+router.put(
+  "/user-type",
+  validate(tokenSchema(), "headers"),
+  guard,
+  validate(userTypeSchema),
+  onboardingController.updateUserType
+);
 
 /**
  * @swagger
@@ -177,7 +190,12 @@ router.put('/user-type', protect, validate(userTypeSchema), onboardingController
  *                       items:
  *                         $ref: '#/components/schemas/Interest'
  */
-router.put('/interests', protect, validate(interestsSchema), onboardingController.updateUserInterests);
+router.put(
+  "/interests",
+  guard,
+  validate(interestsSchema),
+  onboardingController.updateUserInterests
+);
 
 /**
  * @swagger
@@ -225,7 +243,12 @@ router.put('/interests', protect, validate(interestsSchema), onboardingControlle
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put('/travel-preferences', protect, validate(travelPreferencesSchema), onboardingController.updateTravelPreferences);
+router.put(
+  "/travel-preferences",
+  guard,
+  validate(travelPreferencesSchema),
+  onboardingController.updateTravelPreferences
+);
 
 /**
  * @swagger
@@ -251,7 +274,7 @@ router.put('/travel-preferences', protect, validate(travelPreferencesSchema), on
  *       200:
  *         description: Trip purpose updated successfully
  */
-router.put('/trip-purpose', protect, onboardingController.updateTripPurpose);
+router.put("/trip-purpose", guard, onboardingController.updateTripPurpose);
 
 /**
  * @swagger
@@ -281,7 +304,11 @@ router.put('/trip-purpose', protect, onboardingController.updateTripPurpose);
  *       200:
  *         description: Planner profile updated successfully
  */
-router.put('/planner-profile', protect, onboardingController.updatePlannerProfile);
+router.put(
+  "/planner-profile",
+  guard,
+  onboardingController.updatePlannerProfile
+);
 
 /**
  * @swagger
@@ -311,7 +338,7 @@ router.put('/planner-profile', protect, onboardingController.updatePlannerProfil
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/complete', protect, onboardingController.completeOnboarding);
+router.post("/complete", guard, onboardingController.completeOnboarding);
 
 /**
  * @swagger
@@ -341,7 +368,7 @@ router.post('/complete', protect, onboardingController.completeOnboarding);
  *                       items:
  *                         $ref: '#/components/schemas/UserType'
  */
-router.get('/user-types', onboardingController.getUserTypes);
+router.get("/user-types", onboardingController.getUserTypes);
 
 /**
  * @swagger
@@ -354,8 +381,8 @@ router.get('/user-types', onboardingController.getUserTypes);
  *       200:
  *         description: Trip purposes retrieved successfully
  */
-router.get('/trip-purposes', onboardingController.getTripPurposes);
+router.get("/trip-purposes", onboardingController.getTripPurposes);
 
-router.get('/interests', onboardingController.getInterests);
+router.get("/interests", onboardingController.getInterests);
 
 module.exports = router;
