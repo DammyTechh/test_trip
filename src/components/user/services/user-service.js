@@ -27,12 +27,11 @@ class OnboardingService extends CustomResponse {
       return this._response(500, "Failed to retrieve user profile.");
     }
   }
-  static async updateUserType(params) {
+  static async updateUserType(userId, userTypeId) {
     try {
-      const { userId, userTypeId } = params;
       const userType = await userRepository.findByUserTypeId(userTypeId);
       if (!userType) return this.response(404, "User type not found");
-      const user = await UserRepository.findById(userId);
+      const user = await userRepository.findById(userId);
       if (!user) return this.response(404, "User type not found");
       await userRepository.updateById(user.user_id, { usertype_id: userType });
       return this.response(200, "User Type Updated Successfully");
@@ -40,9 +39,8 @@ class OnboardingService extends CustomResponse {
       return this.response(500, "Failed to update user type");
     }
   }
-  static async updateUserInterests(params) {
+  static async updateUserInterests(userId, interestIds) {
     try {
-      const { userId, interestIds } = params;
       const user = await userRepository.findById(userId);
       if (!user) return this.response(404, "User not found.");
       await userInterestRepository.deleteById(user.user_id);
@@ -58,16 +56,15 @@ class OnboardingService extends CustomResponse {
       return this.response(500, "Failed to update user interests.");
     }
   }
-  static async updateTravelPreferences(userId, preferences) {
+  static async updateTravelPreferences(userId, body) {
     try {
-      const { travelFrequency, budgetRange } = preferences;
+      const { travel_frequency, budget_range } = body;
       const user = await userRepository.findById(userId);
       if (!user) return this.response(false, 404, "User not found.");
 
       await userRepository.update(userId, {
-        travel_frequency: travelFrequency,
-        budget_range: budgetRange,
-        updated_at: new Date(),
+        travel_frequency,
+        budget_range,
       });
 
       return this.response(200, "Travel preferences updated successfully.");
@@ -130,12 +127,6 @@ class OnboardingService extends CustomResponse {
   }
   static async updatePlannerProfile(userId, body) {
     try {
-      const {
-        destination_specialties,
-        planning_experience_years,
-        planning_rate,
-      } = body;
-
       const user = await userRepository.findById(userId);
       if (!user) {
         return this.response(false, 404, "User not found.");
