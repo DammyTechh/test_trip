@@ -47,8 +47,6 @@ class OnboardingService extends CustomResponse {
       const userInterests = interestIds.map((interestId) => ({
         user_id: userId,
         interest_id: interestId,
-        created_at: new Date(),
-        updated_at: new Date(),
       }));
       await userInterestRepository.save(userInterests);
       return this.response(200, "User interests updated successfully.");
@@ -61,12 +59,10 @@ class OnboardingService extends CustomResponse {
       const { travel_frequency, budget_range } = body;
       const user = await userRepository.findById(userId);
       if (!user) return this.response(false, 404, "User not found.");
-
       await userRepository.update(userId, {
         travel_frequency,
         budget_range,
       });
-
       return this.response(200, "Travel preferences updated successfully.");
     } catch (error) {
       console.error("Update travel preferences error:", error);
@@ -78,10 +74,8 @@ class OnboardingService extends CustomResponse {
       const user = await userRepository.findById(userId);
       if (!user) return this.response(false, 404, "User not found.");
       await userRepository.updateById(userId, {
-        is_onboarded: true,
-        updated_at: new Date(),
+        is_onboarded: true
       });
-
       return this.response(true, 200, "Onboarding completed successfully.");
     } catch (error) {
       console.error("Complete onboarding error:", error);
@@ -127,11 +121,22 @@ class OnboardingService extends CustomResponse {
   }
   static async updatePlannerProfile(userId, body) {
     try {
+      const {
+        destination_specialties,
+        planning_experience_years,
+        planning_rate,
+      } = body;
+
       const user = await userRepository.findById(userId);
       if (!user) {
         return this.response(false, 404, "User not found.");
       }
-      await userRepository.update(userId, body);
+      await userRepository.update(userId, {
+        destination_specialties,
+        planning_experience_years,
+        planning_experience_years,
+        planning_rate,
+      });
 
       return this.response(200, "Planner profile updated successfully.");
     } catch (error) {

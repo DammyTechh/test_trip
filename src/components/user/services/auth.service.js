@@ -122,10 +122,8 @@ class AuthService extends CustomResponse {
     try {
       const { email, password } = body;
       const user = await UserRepository.findByEmail(email);
-
-      if (!user) {
-        return this.response(401, "Invalid Email or Password");
-      }
+      if (!user) return this.response(401, "Invalid Email or Password");
+      
       if (!user.is_verified) {
         return this.response(
           false,
