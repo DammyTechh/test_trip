@@ -12,19 +12,22 @@ const ActivityCategory = new EntitySchema({
     name: {
       type: 'varchar',
       length: 100,
-      nullable: true,
+      nullable: false, // Name is required
     },
     created_at: {
-      type: 'datetime',
-      nullable: true,
+      type: 'timestamp',
+      createDate: true, // Automatically set on insert
     },
     updated_at: {
-      type: 'datetime',
-      nullable: true,
+      type: 'timestamp',
+      updateDate: true, // Automatically updated
     },
-    updated_by: {
-      type: 'bigint',
-      nullable: true,
+  },
+  relations: {
+    activities: {
+      target: 'TripActivity',
+      type: 'one-to-many',
+      inverseSide: 'category',
     },
   },
 });

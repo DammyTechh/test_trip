@@ -1,18 +1,21 @@
 const { EntitySchema } = require("typeorm");
 
-const UserInterest = new EntitySchema({
-  name: "UserInterest",
-  tableName: "user_interests",
+const TripInterest = new EntitySchema({
+  name: "TripInterest",
+  tableName: "trip_interests",
   columns: {
-    id: { type: "uuid", primary: true },
+    id: {
+      type: "uuid",
+      primary: true,
+    },
     created_at: { type: "timestamp", createDate: true },
     updated_at: { type: "timestamp", updateDate: true },
   },
-  relations: {
-    user: {
+ relations: {
+    trip: {
       type: "many-to-one",
-      target: "User",
-      joinColumn: { name: "user_id" },
+      target: "Trip",
+      joinColumn: { name: "trip_id" },
       onDelete: "CASCADE",
       inverseSide: "interests",
     },
@@ -21,9 +24,9 @@ const UserInterest = new EntitySchema({
       target: "Interest",
       joinColumn: { name: "interest_id" },
       onDelete: "CASCADE",
-      inverseSide: "userInterests",
+      inverseSide: "tripInterests",
     },
   },
 });
 
-module.exports = { UserInterest };
+module.exports = { TripInterest };

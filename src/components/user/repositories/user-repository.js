@@ -53,6 +53,11 @@ class UserRepository {
     });
     return user;
   }
+
+  async findAll(){
+    const user= await this._repository.find();
+    return user;
+  }
 }
 
 module.exports = new UserRepository();

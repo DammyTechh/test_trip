@@ -2,7 +2,7 @@ const { EntitySchema } = require("typeorm");
 
 const User = new EntitySchema({
   name: "User",
-  tableName: "user",
+  tableName: "users",
   columns: {
     user_id: {
       type: "uuid",
@@ -11,12 +11,10 @@ const User = new EntitySchema({
     },
     first_name: {
       type: "varchar",
-      length: 45,
       nullable: false,
     },
     last_name: {
       type: "varchar",
-      length: 45,
       nullable: false,
     },
     email: {
@@ -33,10 +31,6 @@ const User = new EntitySchema({
     phone_number: {
       type: "varchar",
       length: 20,
-      nullable: true,
-    },
-    usertype_id: {
-      type: "int",
       nullable: true,
     },
     is_verified: {
@@ -92,16 +86,6 @@ const User = new EntitySchema({
       scale: 2,
       nullable: true,
     },
-    social_provider: {
-      type: "varchar",
-      length: 50,
-      nullable: true,
-    },
-    social_id: {
-      type: "varchar",
-      length: 255,
-      nullable: true,
-    },
     created_at: {
       type: "timestamp",
       createDate: true,
@@ -110,22 +94,22 @@ const User = new EntitySchema({
       type: "timestamp",
       updateDate: true,
     },
-    updated_by: {
-      type: "bigint",
-      nullable: true,
-    },
   },
   relations: {
-    userType: {
-      target: "UserType",
-      type: "many-to-one",
-      joinColumn: { name: "usertype_id" },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
+    userRoles: {
+      type: "one-to-many",
+      target: "UserRole",
+      inverseSide: "user",
+      cascade: true,
     },
     userInterests: {
       target: "UserInterest",
       type: "one-to-many",
+      inverseSide: "user",
+    },
+    userDestinationSpecialties: {
+      type: "one-to-many",
+      target: "UserDestinationSpecialties",
       inverseSide: "user",
     },
     trips: {

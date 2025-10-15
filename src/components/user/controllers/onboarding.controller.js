@@ -85,13 +85,8 @@ class OnboardingController {
   static async completeOnboarding(req, res) {
     try {
       const userId = req.user.user_id;
-      const result = await onboardingService.completeOnboarding(userId);
-
-      if (!result.success) {
-        return response(res, result.status, result.message);
-      }
-
-      return response(res, 200, result.message);
+      const { statusCode, message, data } = await onboardingService.completeOnboarding(userId);
+      return response(res, statusCode, message, data);
     } catch (error) {
       console.error("Complete onboarding controller error:", error);
       return response(res, 500, "An unexpected error occurred.");
@@ -100,13 +95,10 @@ class OnboardingController {
 
   static async getUserTypes(req, res) {
     try {
-      const result = await onboardingService.getAllUserTypes();
+      const { statusCode, message, data } =
+        await onboardingService.getAllUserTypes();
 
-      if (!result.success) {
-        return response(res, result.status, result.message);
-      }
-
-      return response(res, 200, result.message, result.data);
+      return response(res, statusCode, message, data);
     } catch (error) {
       console.error("Get user types controller error:", error);
       return errorResponseMsg(res, 500, "An unexpected error occurred.");
@@ -115,8 +107,9 @@ class OnboardingController {
 
   static async getInterests(req, res) {
     try {
-      const result = await onboardingService.getAllInterests();
-      return response(res, 200, result.message, result.data);
+      const { statusCode, message, data } =
+        await onboardingService.getAllInterests();
+      return response(res, statusCode, message, data);
     } catch (error) {
       console.error("Get interests controller error:", error);
       return response(res, 500, "An unexpected error occurred.");

@@ -155,11 +155,11 @@ class AuthService extends CustomResponse {
       if (!user) return this.response(400, "User Not Found");
       const { otp, hashedOtp } = generateCode();
       const passwordResetCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
-
       await UserRepository.updateById(user.user_id, {
         password_reset_code: hashedOtp,
         password_reset_code_expires_at: passwordResetCodeExpires,
       });
+      
       await sendEmail({
         from: appEnv.FROM_NAME,
         receiver: body.email,

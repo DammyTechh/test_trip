@@ -2,34 +2,38 @@ const { EntitySchema } = require('typeorm');
 
 const UserType = new EntitySchema({
   name: 'UserType',
-  tableName: 'usertype',
+  tableName: 'user_types',
   columns: {
     id: {
-      type: 'int',
+      type: 'uuid',
       primary: true,
-      generated: false,
+      generated: 'uuid',
     },
     name: {
       type: 'varchar',
-      length: 45,
-      nullable: true,
+      length: 50,
+      unique: true,
+      nullable: false,
     },
     description: {
       type: 'varchar',
-      length: 45,
+      length: 255,
       nullable: true,
     },
     created_at: {
-      type: 'datetime',
-      nullable: true,
+      type: 'timestamp',
+      createDate: true,
     },
     updated_at: {
-      type: 'datetime',
-      nullable: true,
+      type: 'timestamp',
+      updateDate: true,
     },
-    updated_by: {
-      type: 'bigint',
-      nullable: true,
+  },
+  relations: {
+    userRoles: {
+      type: 'one-to-many',
+      target: 'UserRole',
+      inverseSide: 'userType',
     },
   },
 });

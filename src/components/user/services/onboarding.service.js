@@ -10,10 +10,10 @@
 //   try {
 //     const userRepository = getUserRepository();
     
-//     const user = await userRepository.findOne({
-//       where: { user_id: userId },
-//       relations: ['userType', 'userInterests', 'userInterests.interest'],
-//     });
+    // const user = await userRepository.findOne({
+    //   where: { user_id: userId },
+    //   relations: ['userType', 'userInterests', 'userInterests.interest'],
+    // });
 
 //     if (!user) {
 //       return serviceResponse(false, 404, 'User not found.');

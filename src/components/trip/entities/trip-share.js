@@ -1,58 +1,33 @@
-const { EntitySchema } = require('typeorm');
+const { EntitySchema } = require("typeorm");
 
 const TripShare = new EntitySchema({
-  name: 'TripShare',
-  tableName: 'trip_share',
+  name: "TripShare",
+  tableName: "trip_share",
   columns: {
-    id: {
-      type: 'int',
-      primary: true,
-      generated: true,
-    },
-    trip_id: {
-      type: 'bigint',
+    id: { type: "uuid", primary: true, generated: "uuid" },
+    trip_id: { type: "uuid", nullable: false },
+    shared_user_id: { type: "uuid", nullable: false },
+    status: {
+      type: "varchar",
+      length: 50,
       nullable: false,
+      default: "pending",
     },
-    trip_user_id: {
-      type: 'bigint',
-      nullable: false,
-    },
-    shared_user_id: {
-      type: 'bigint',
-      nullable: false,
-    },
-    created_at: {
-      type: 'datetime',
-      nullable: true,
-    },
-    created_by: {
-      type: 'bigint',
-      nullable: true,
-    },
-    updated_at: {
-      type: 'datetime',
-      nullable: true,
-    },
-    updated_by: {
-      type: 'bigint',
-      nullable: true,
-    },
+    created_at: { type: "timestamp", createDate: true },
+    updated_at: { type: "timestamp", updateDate: true },
   },
   relations: {
     trip: {
-      target: 'Trip',
-      type: 'many-to-one',
-      joinColumn: { name: 'trip_id' },
-    },
-    tripCreator: {
-      target: 'User',
-      type: 'many-to-one',
-      joinColumn: { name: 'trip_user_id' },
+      target: "Trip",
+      type: "many-to-one",
+      joinColumn: { name: "trip_id" },
+      onDelete: "CASCADE", // If the trip is deleted, remove shares
     },
     sharedUser: {
-      target: 'User',
-      type: 'many-to-one',
-      joinColumn: { name: 'shared_user_id' },
+      target: "User",
+      type: "many-to-one",
+      joinColumn: { name: "shared_user_id" },
+      onDelete: "CASCADE", // If the user is deleted, remove shares
     },
   },
 });

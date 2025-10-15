@@ -1,6 +1,6 @@
 const express= require('express');
 const router= express.Router();
-const { swaggerUi, specs } = require("../config/swagger");
+const { swaggerUi, specs } = require("./swagger");
 
 
 router.get(

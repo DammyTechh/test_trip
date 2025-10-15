@@ -1,40 +1,36 @@
-const { EntitySchema } = require('typeorm');
+const { EntitySchema } = require("typeorm");
 
 const Interest = new EntitySchema({
-  name: 'Interest',
-  tableName: 'interest',
+  name: "Interest",
+  tableName: "interests",
   columns: {
-    interest_id: {
-      type: 'bigint',
+    id: {
+      type: "uuid",
       primary: true,
-      generated: true,
     },
     name: {
-      type: 'varchar',
+      type: "varchar",
       length: 100,
       nullable: true,
     },
     description: {
-      type: 'varchar',
+      type: "varchar",
       length: 255,
       nullable: true,
     },
-    icon: {
-      type: 'varchar',
-      length: 100,
-      nullable: true,
+    created_at: { type: "timestamp", createDate: true },
+    updated_at: { type: "timestamp", updateDate: true },
+  },
+   relations: {
+    userInterests: {
+      type: "one-to-many",
+      target: "UserInterest",
+      inverseSide: "interest",
     },
-    created_at: {
-      type: 'datetime',
-      nullable: true,
-    },
-    updated_at: {
-      type: 'datetime',
-      nullable: true,
-    },
-    updated_by: {
-      type: 'bigint',
-      nullable: true,
+    tripInterests: {
+      type: "one-to-many",
+      target: "TripInterest",
+      inverseSide: "interest",
     },
   },
 });
