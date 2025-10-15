@@ -1,4 +1,5 @@
 const { EntitySchema } = require("typeorm");
+const { OnboardingSteps } = require("../../../utils/onboarding-steps");
 
 const User = new EntitySchema({
   name: "User",
@@ -11,11 +12,11 @@ const User = new EntitySchema({
     },
     first_name: {
       type: "varchar",
-      nullable: false,
+      nullable: true,
     },
     last_name: {
       type: "varchar",
-      nullable: false,
+      nullable: true,
     },
     email: {
       type: "varchar",
@@ -53,10 +54,16 @@ const User = new EntitySchema({
       type: "datetime",
       nullable: true,
     },
+    // Step-based onboarding
+    onboarding_step: {
+      type: "int",
+      default: OnboardingSteps.EMAIL_SUBMITTED, // 0 = email submitted, 1 = profile, 2 = interests, 3 = preferences, etc.
+    },
     is_onboarded: {
       type: "boolean",
-      default: false,
+      default: false, // set to true when onboarding_step reaches final step
     },
+
     travel_frequency: {
       type: "varchar",
       length: 50,

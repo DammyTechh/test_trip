@@ -1,7 +1,7 @@
 const express = require("express");
 require("reflect-metadata");
 const { initializeDatabase } = require("./src/config/database");
-// const { seedDefaultData } = require("./src/seeders/defaultData");
+const { seedDefaultData } = require("./src/seeders/defaultData");
 const notFound = require("./src/middlewares/notFound.middleware");
 const errorHandler = require("./src/middlewares/errorHandler.middleware");
 const {
@@ -35,7 +35,7 @@ const initializeApp = async () => {
     await initializeDatabase();
     console.log("✅ TypeORM database connection established successfully.");
 
-    // await seedDefaultData();
+    await seedDefaultData();
     console.log("✅ Default data seeded successfully.");
 
     app.listen(PORT, () => {
