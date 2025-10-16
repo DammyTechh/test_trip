@@ -1,6 +1,47 @@
 const helmet = require('helmet');
 const cors = require('cors');
-const { errorResponseMsg } = require('../utils/response');
+
+const rateLimit = require('express-rate-limit');
+
+const createRateLimit = (windowMs, max, message) => {
+  return rateLimit({
+    windowMs,
+    max,
+    message: {
+      status: 'error',
+      message: message || 'Too many requests, please try again later.',
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+};
+
+
+const authRateLimit = createRateLimit(
+  15 * 60 * 1000, 
+  5, 
+  'Too many authentication attempts, please try again in 15 minutes.'
+);
+
+const generalRateLimit = createRateLimit(
+  15 * 60 * 1000, 
+  100, 
+  'Too many requests, please try again in 15 minutes.'
+);
+
+const strictRateLimit = createRateLimit(
+  15 * 60 * 1000, 
+  10, 
+  'Too many requests to this endpoint, please try again in 15 minutes.'
+);
+
+
+const passwordResetRateLimit = createRateLimit(
+  60 * 60 * 1000, 
+  3, 
+  'Too many password reset attempts, please try again in 1 hour.'
+);
+
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -82,6 +123,11 @@ const sanitizeInput = (req, res, next) => {
 
 module.exports = {
   corsOptions,
+  authRateLimit,
+  generalRateLimit,
+  strictRateLimit,
   securityHeaders,
   sanitizeInput,
+  passwordResetRateLimit,
+
 };
