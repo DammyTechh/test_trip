@@ -43,6 +43,7 @@ class UserRepository {
         first_name: true,
         last_name: true,
         password: true,
+        onboarding_step: true
       },
       relations: ["user_roles", "user_roles.user_type", "user_interests", 'trips', "user_destination_specialties"],
     });
