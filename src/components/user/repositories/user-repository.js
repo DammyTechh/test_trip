@@ -22,8 +22,8 @@ class UserRepository {
   }
 
   async findByEmail(email) {
-    const response = await this._repository.findOneBy({
-      email,
+    const response = await this._repository.findOne({
+      where: { email },
     });
     return response;
   }
@@ -42,9 +42,9 @@ class UserRepository {
         email: true,
         first_name: true,
         last_name: true,
-        password: true
+        password: true,
       },
-      relations: ["user_roles", "user_roles.user_type"],
+      relations: ["user_roles", "user_roles.user_type", "user_interests", 'trips', "user_destination_specialties"],
     });
     return response;
   }

@@ -1,235 +1,191 @@
-// const { 
-//   getUserRepository, 
-//   getUserTypeRepository, 
-//   getInterestRepository, 
-//   getUserInterestRepository 
-// } = require('../models');
-// const { serviceResponse } = require('../utils/response');
+const userTypeRepository = require("../repositories/user-type-repository");
+const userRepository = require("../repositories/user-repository");
+const CustomResponse = require("../../../utils/custom-response");
+const userInterestRepository = require("../repositories/user-interest-repository");
+const tripPurposeRepository = require("../../trip/repositories/trip-purpose-repository");
+const interestRepository = require("../../trip/repositories/interest-repository");
+const { hashPassword, jwtSign } = require("../../../utils/helper");
+const userRoleRepository = require("../repositories/user-role-repository");
+const { OnboardingSteps } = require("../../../utils/onboarding-steps");
+const userDestinationSpecialtyRepository = require("../repositories/user-destination-specialty-repository");
 
-// const getUserProfile = async (userId) => {
-//   try {
-//     const userRepository = getUserRepository();
-    
-    // const user = await userRepository.findOne({
-    //   where: { user_id: userId },
-    //   relations: ['userType', 'userInterests', 'userInterests.interest'],
-    // });
+class OnboardingService extends CustomResponse {
+  constructor(statusCode, message, data) {
+    super(statusCode, message, data);
+  }
 
-//     if (!user) {
-//       return serviceResponse(false, 404, 'User not found.');
-//     }
+  static async updateUserDetails(body) {
+    try {
+      const { password, ...rest } = body;
+      const existingUser = await userRepository.findByEmail(body.email);
+      if (!existingUser) return this.response(401, "User Not Found");
+      if (!existingUser.is_verified)
+        return this.response(400, "Account Not Verified");
+      const hashedPassword = hashPassword(password);
+      const user = await userRepository.updateById(existingUser.user_id, {
+        ...rest,
+        password: hashedPassword,
+        onboarding_step: 2,
+      });
+      const token = jwtSign({
+        user_id: user.user_id,
+        email: user.email,
+        first_name: user?.first_name,
+        last_name: user?.last_name,
+      });
+      return this.response(201, "Details updated successfully.", {
+        token,
+        user,
+      });
+    } catch (error) {
+      console.log(error, "error");
+      return this.response(500, "Something went wrong");
+    }
+  }
 
-//     // Remove sensitive data
-//     const { password, verification_token, verification_code, ...userProfile } = user;
+  static async getUserTypes() {
+    try {
+      const userTypes = await userTypeRepository.findAll();
+      return this.response(200, "User types fetched successfully", userTypes);
+    } catch (err) {
+      return this.response(500, "Failed to retrieve user profile.");
+    }
+  }
 
-//     return serviceResponse(true, 200, 'User profile retrieved successfully.', { user: userProfile });
-//   } catch (error) {
-//     console.error('Get user profile error:', error);
-//     return serviceResponse(false, 500, 'Failed to retrieve user profile.');
-//   }
-// };
+  static async getAllUser() {
+    try {
+      const userTypes = await userTypeRepository.findAll();
+      return this.response(200, "User types retrieved successfully.", {
+        userTypes,
+      });
+    } catch (error) {
+      console.error("Get user types error:", error);
+      return this.response(500, "Failed to retrieve user types.");
+    }
+  }
+  static async getAllInterests() {
+    try {
+      const interests = await interestRepository.findAll();
+      return this.response(200, "Interests retrieved successfully.", interests);
+    } catch (error) {
+      console.error("Get interests error:", error);
+      return this.response(500, "Failed to retrieve interests.");
+    }
+  }
 
-// const updateUserType = async (userId, userTypeId) => {
-//   try {
-//     const userTypeRepository = getUserTypeRepository();
-//     const userRepository = getUserRepository();
-    
-//     const userType = await userTypeRepository.findOne({ where: { id: userTypeId } });
-//     if (!userType) {
-//       return serviceResponse(false, 404, 'User type not found.');
-//     }
+  static async getUserById(userId) {
+    try {
+      const user = await userRepository.findById(userId);
+      if (!user) return this.response(400, "User not found");
+      return this.response(200, "User retrieved successfully.", user);
+    } catch (error) {
+      console.error("Get User error:", error);
+      return this.response(500, "Failed to retrieve user.");
+    }
+  }
 
-//     const user = await userRepository.findOne({ where: { user_id: userId } });
-//     if (!user) {
-//       return serviceResponse(false, 404, 'User not found.');
-//     }
+  static async addUserType(body) {
+    try {
+      const user = await userRepository.findByEmail(body.email);
+      if (!user) return this.response(400, "User not found");
 
-//     await userRepository.update(
-//       { user_id: userId },
-//       { 
-//         usertype_id: userTypeId,
-//         updated_at: new Date()
-//       }
-//     );
+      const userType = await userTypeRepository.findById(body.user_type_id);
+      if (!userType) return this.response(404, "User type not found");
 
-//     return serviceResponse(true, 200, 'User type updated successfully.');
-//   } catch (error) {
-//     console.error('Update user type error:', error);
-//     return serviceResponse(false, 500, 'Failed to update user type.');
-//   }
-// };
+      const existingRole = await userRoleRepository.findByUserId(user.user_id);
 
-// const updateUserInterests = async (userId, interestIds) => {
-//   try {
-//     const userRepository = getUserRepository();
-//     const userInterestRepository = getUserInterestRepository();
-    
-//     const user = await userRepository.findOne({ where: { user_id: userId } });
-//     if (!user) {
-//       return serviceResponse(false, 404, 'User not found.');
-//     }
+      if (existingRole) {
+        existingRole.user_type = { id: body.user_type_id };
+        const updatedRole = await userRoleRepository.updateById(
+          existingRole.id,
+          existingRole
+        );
+        return this.response(
+          200,
+          "User type updated successfully.",
+          updatedRole
+        );
+      }
 
-//     // Remove existing interests
-//     await userInterestRepository.delete({ user_id: userId });
+      // Create a new one if none exists
+      const newRole = await userRoleRepository.save(
+        user.user_id,
+        body.user_type_id
+      );
+      return this.response(200, "User type added successfully.", newRole);
+    } catch (error) {
+      console.error("Add User Type Error:", error);
+      return this.response(500, "Failed to assign user type.");
+    }
+  }
 
-//     // Add new interests
-//     const userInterests = interestIds.map(interestId => ({
-//       user_id: userId,
-//       interest_id: interestId,
-//       created_at: new Date(),
-//       updated_at: new Date()
-//     }));
+  static async selectInterests(body, user) {
+    try {
+      const { interest_ids, ...rest } = body;
+      await Promise.all(
+        interest_ids.map(async (interestId) => {
+          const interestExist = await interestRepository.findById(interestId);
+          if (!interestExist) return;
+          const userHasInterest =
+            await userInterestRepository.findByUserAndInterest(
+              user.user_id,
+              interestId
+            );
+          if (userHasInterest) return;
 
-//     await userInterestRepository.save(userInterests);
+          // Create the link between user and interest
+          await userInterestRepository.save(user.userId, interestId);
+        })
+      );
+      await userRepository.updateById(user.user_id, { ...rest });
+      return this.response(200, "Interests selected successfully.");
+    } catch (error) {
+      console.error("Get interests error:", error);
+      return this.response(500, "Failed to retrieve interests.");
+    }
+  }
+  static async updatePlannerDetails(userId, body) {
+    try {
+      const user = await userRepository.findById(userId);
+      const {
+        destination_specialties,
+        planning_experience_years,
+        planning_rate,
+      } = body;
+      if (!user) return this.response(404, "User not found.");
+      await Promise.all(
+        destination_specialties.map((destination) =>
+          userDestinationSpecialtyRepository.save(user.user_id, {
+            name: destination,
+          })
+        )
+      );
+      await userRepository.updateById(user.user_id, {
+        planning_experience_years,
+        planning_rate,
+        onboarding_step: OnboardingSteps.PLANNER_DETAILS,
+      });
+      return this.response(200, "User Details updated successfully.");
+    } catch (error) {
+      console.error("Update planner details error:", error);
+      return this.response(500, "Failed to update planner details.");
+    }
+  }
+  static async updateTripPurpose(userId, body) {
+    try {
+      const { trip_purpose } = body;
+      const user = await userRepository.findById(userId);
+      if (!user) return this.response(404, "User not found.");
+      await userRepository.updateById(user.user_id, {
+        trip_purpose,
+        onboarding_step: OnboardingSteps.FINISHED,
+      });
+      return this.response(200, "Trip purpose updated successfully.");
+    } catch (error) {
+      console.error("Update trip purpose error:", error);
+      return this.response(500, "Failed to update trip purpose.");
+    }
+  }
+}
 
-//     return serviceResponse(true, 200, 'User interests updated successfully.');
-//   } catch (error) {
-//     console.error('Update user interests error:', error);
-//     return serviceResponse(false, 500, 'Failed to update user interests.');
-//   }
-// };
-
-// const updateTravelPreferences = async (userId, preferences) => {
-//   try {
-//     const userRepository = getUserRepository();
-//     const { travelFrequency, budgetRange } = preferences;
-    
-//     const user = await userRepository.findOne({ where: { user_id: userId } });
-//     if (!user) {
-//       return serviceResponse(false, 404, 'User not found.');
-//     }
-
-//     await userRepository.update(
-//       { user_id: userId },
-//       { 
-//         travel_frequency: travelFrequency,
-//         budget_range: budgetRange,
-//         updated_at: new Date()
-//       }
-//     );
-
-//     return serviceResponse(true, 200, 'Travel preferences updated successfully.');
-//   } catch (error) {
-//     console.error('Update travel preferences error:', error);
-//     return serviceResponse(false, 500, 'Failed to update travel preferences.');
-//   }
-// };
-
-// const completeOnboarding = async (userId) => {
-//   try {
-//     const userRepository = getUserRepository();
-//     const user = await userRepository.findOne({ where: { user_id: userId } });
-//     if (!user) {
-//       return serviceResponse(false, 404, 'User not found.');
-//     }
-
-//     await userRepository.update(
-//       { user_id: userId },
-//       { 
-//         is_onboarded: true,
-//         updated_at: new Date()
-//       }
-//     );
-
-//     return serviceResponse(true, 200, 'Onboarding completed successfully.');
-//   } catch (error) {
-//     console.error('Complete onboarding error:', error);
-//     return serviceResponse(false, 500, 'Failed to complete onboarding.');
-//   }
-// };
-
-// const getAllUserTypes = async () => {
-//   try {
-//     const userTypeRepository = getUserTypeRepository();
-//     const userTypes = await userTypeRepository.find();
-//     return serviceResponse(true, 200, 'User types retrieved successfully.', { userTypes });
-//   } catch (error) {
-//     console.error('Get user types error:', error);
-//     return serviceResponse(false, 500, 'Failed to retrieve user types.');
-//   }
-// };
-
-// const getAllInterests = async () => {
-//   try {
-//     const interestRepository = getInterestRepository();
-//     const interests = await interestRepository.find();
-//     return serviceResponse(true, 200, 'Interests retrieved successfully.', { interests });
-//   } catch (error) {
-//     console.error('Get interests error:', error);
-//     return serviceResponse(false, 500, 'Failed to retrieve interests.');
-//   }
-// };
-
-// const updateTripPurpose = async (userId, tripPurpose) => {
-//   try {
-//     const userRepository = getUserRepository();
-//     const user = await userRepository.findOne({ where: { user_id: userId } });
-//     if (!user) {
-//       return serviceResponse(false, 404, 'User not found.');
-//     }
-
-//     await userRepository.update(
-//       { user_id: userId },
-//       { 
-//         trip_purpose: tripPurpose,
-//         updated_at: new Date()
-//       }
-//     );
-
-//     return serviceResponse(true, 200, 'Trip purpose updated successfully.');
-//   } catch (error) {
-//     console.error('Update trip purpose error:', error);
-//     return serviceResponse(false, 500, 'Failed to update trip purpose.');
-//   }
-// };
-
-// const updatePlannerProfile = async (userId, plannerData) => {
-//   try {
-//     const userRepository = getUserRepository();
-//     const { destinationSpecialties, planningExperienceYears, planningRate } = plannerData;
-    
-//     const user = await userRepository.findOne({ where: { user_id: userId } });
-//     if (!user) {
-//       return serviceResponse(false, 404, 'User not found.');
-//     }
-
-//     await userRepository.update(
-//       { user_id: userId },
-//       { 
-//         destination_specialties: destinationSpecialties,
-//         planning_experience_years: planningExperienceYears,
-//         planning_rate: planningRate,
-//         updated_at: new Date()
-//       }
-//     );
-
-//     return serviceResponse(true, 200, 'Planner profile updated successfully.');
-//   } catch (error) {
-//     console.error('Update planner profile error:', error);
-//     return serviceResponse(false, 500, 'Failed to update planner profile.');
-//   }
-// };
-
-// const getAllTripPurposes = async () => {
-//   try {
-//     const tripPurposeRepository = getTripPurposeRepository();
-//     const purposes = await tripPurposeRepository.find();
-//     return serviceResponse(true, 200, 'Trip purposes retrieved successfully.', { purposes });
-//   } catch (error) {
-//     console.error('Get trip purposes error:', error);
-//     return serviceResponse(false, 500, 'Failed to retrieve trip purposes.');
-//   }
-// };
-
-// module.exports = {
-//   getUserProfile,
-//   updateUserType,
-//   updateUserInterests,
-//   updateTravelPreferences,
-//   updateTripPurpose,
-//   updatePlannerProfile,
-//   completeOnboarding,
-//   getAllUserTypes,
-//   getAllInterests,
-//   getAllTripPurposes,
-// };
+module.exports = OnboardingService;
