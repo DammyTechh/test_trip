@@ -14,6 +14,8 @@ class AuthController {
     }
   }
 
+
+
   static async verifyEmail(req, res) {
     try {
       const { statusCode, message, data } = await AuthService.verifyEmail(
@@ -83,7 +85,7 @@ class AuthController {
   static async changePassword(req, res) {
     try {
       const { statusCode, message, data } = await AuthService.updatePassword(
-        req.body
+       req?.user?.user_id, req.body
       );
       return response(res, statusCode, message, data);
     } catch (error) {
@@ -92,6 +94,4 @@ class AuthController {
   }
 }
 
-module.exports= AuthController
-
-
+module.exports = AuthController;

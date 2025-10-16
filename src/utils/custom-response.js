@@ -3,7 +3,7 @@ class CustomResponse {
   _message;
   _data;
 
-  constructor(statusCode, message, data) {
+  constructor(statusCode, message, data = null) {
     this._statusCode= statusCode;
     this._message= message;
     this._data= data;

@@ -27,19 +27,16 @@ class AuthService extends CustomResponse {
   constructor(statusCode, message, data) {
     super(statusCode, message, data);
   }
-
+  
   static async registerUser(body) {
     try {
-      const { password, ...rest } = body;
       const existingUser = await UserRepository.findByEmail(body.email);
       if (existingUser)
         return this.response(401, "User with this email already exists");
       const verificationExpires = new Date(Date.now() + 10 * 60 * 1000);
-      const hashedPassword = hashPassword(password);
       const { otp, hashedOtp } = generateCode();
       const user = await UserRepository.create({
-        ...rest,
-        password: hashedPassword,
+        ...body,
         email_verification_code: hashedOtp,
         email_verification_expires_at: verificationExpires,
       });
@@ -47,7 +44,7 @@ class AuthService extends CustomResponse {
         from: appEnv.FROM_NAME,
         receiver: body.email,
         subject: "Welcome world",
-        html: verifyEmailTemplate(body.first_name, otp),
+        html: verifyEmailTemplate('', otp),
       });
       return this.response(
         201,
@@ -82,6 +79,8 @@ class AuthService extends CustomResponse {
         is_verified: true,
         email_verification_code: null,
         email_verification_expires_at: null,
+        onboarding_step: 1,
+
       });
       return this.response(200, "Email verified successfully.");
     } catch (error) {
@@ -91,16 +90,11 @@ class AuthService extends CustomResponse {
   }
   static async resendVerificationCode(body) {
     try {
-      const user = await UserRepository.findByEmail(body.email);
-      if (!user) {
-        return this.response(404, "User not found.");
-      }
-      if (existingUser.is_verified) {
-        return this.response(400, "Email already verified.");
-      }
+      const user = await UserRepository.findByEmail(body?.email);
+      if (!user) return this.response(404, "User not found.");
+      if (user.is_verified) return this.response(400, "Email already verified."); 
       const { otp, hashedOtp } = generateCode();
       const verificationExpires = new Date(Date.now() + 10 * 60 * 1000);
-
       await UserRepository.updateById(user.user_id, {
         email_verification_code: hashedOtp,
         email_verification_expires_at: verificationExpires,
@@ -108,13 +102,13 @@ class AuthService extends CustomResponse {
 
       await sendEmail({
         from: appEnv.FROM_NAME,
-        receiver: body.email,
+        receiver: body?.email,
         subject: "New verification code for Tripitify",
-        html: resendVerificationEmail(user.first_name, otp),
+        html: resendVerificationEmail(user?.first_name ?? '', otp),
       });
-
       return this.response(200, "New verification code sent successfully.");
     } catch (error) {
+      console.log(error, "error");
       return this.response(500, "Failed to resend verification code.");
     }
   }
@@ -202,15 +196,15 @@ class AuthService extends CustomResponse {
       return this.response(500, "Password Reset Failed. Try again later");
     }
   }
-  static async updatePassword(body) {
+  static async updatePassword(userId, body) {
     try {
-      const { current_password, user_id, new_password } = body;
-      const user = await UserRepository.findById(body.user_id);
+      const { current_password, new_password } = body;
+      const user = await UserRepository.findById(userId);
       if (!user) return this.response(404, "User not found");
       const valid = comparePassword(current_password, user.password);
       if (!valid) return this.response(401, "Your current password is invalid");
       const hashedPassword = hashPassword(new_password);
-      await UserRepository.updateById(user_id, {
+      await UserRepository.updateById(userId, {
         password: hashedPassword,
       });
       await sendEmail({

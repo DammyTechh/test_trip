@@ -1,62 +1,92 @@
-const onboardingService = require("../services/onboarding.service");
 const response = require("../../../utils/controller-response");
+const OnboardingService = require("../services/user-service");
 
 class OnboardingController {
-  static async getUserProfile(req, res) {
-    try {
-      const response = await onboardingService.getUserProfile(
-        req?.user?.user_id
-      );
-      const { statusCode, message, data } = response;
-      return response(res, statusCode, message, data);
-    } catch (error) {
-      console.error("Get user profile controller error:", error);
-      return response(res, 500, "An unexpected error occurred.");
-    }
-  }
-  static async updateUserType(req, res) {
+  static async updateUserDetails(req, res) {
     try {
       const { statusCode, message, data } =
-        await onboardingService.updateUserType(
-          req.user.user_id,
-          req.body.user_type_id
-        );
+        await OnboardingService.updateUserDetails(req.body);
       return response(res, statusCode, message, data);
     } catch (error) {
-      console.error("Update user type controller error:", error);
-      return response(res, 500, "An unexpected error occurred.");
-    }
-  }
-  static async updateUserInterests(req, res) {
-    try {
-      const userId = req.user.user_id;
-      const { interestIds } = req.body;
-      const { statusCode, message, data } =
-        await onboardingService.updateUserInterests(userId, interestIds);
-      return response(res, statusCode, message, data);
-    } catch (error) {
-      console.error("Update user interests controller error:", error);
-      return response(res, 500, "An unexpected error occurred.");
+      console.error("Update controller error:", error);
+      return response(res, 500, "Something went wrong");
     }
   }
 
-  static async updateTravelPreferences(req, res) {
+  static async addUserType(req, res) {
     try {
-      const userId = req.user.user_id;
-      const { statusCode, message, data } =
-        await onboardingService.updateTravelPreferences(userId, req.body);
+      const { statusCode, message, data } = await OnboardingService.addUserType(
+        req.body
+      );
       return response(res, statusCode, message, data);
     } catch (error) {
-      console.error("Update travel preferences controller error:", error);
-      return response(res, 500, "An unexpected error occurred.");
+      console.error("Update controller error:", error);
+      return response(res, 500, "Something went wrong");
+    }
+  }
+
+  static async updatePlannerDetails(req,res) {
+    try {
+      const { statusCode, message, data } = await OnboardingService.updatePlannerDetails(
+        req.user.user_id,
+        req.body
+      );
+      return response(res, statusCode, message, data);
+    } catch (error) {
+      console.error("Update controller error:", error);
+      return response(res, 500, "Something went wrong");
+    }
+  }
+
+  static async getUser(req, res) {
+    try {
+      const { statusCode, message, data } = await OnboardingService.getUserById(
+        req.user.user_id
+      );
+      return response(res, statusCode, message, data);
+    } catch (error) {
+      console.error("Get user controller error:", error);
+      return response(res, 500, "Something went wrong");
+    }
+  }
+    static async getUserById(req, res) {
+    try {
+      const { statusCode, message, data } = await OnboardingService.getUserById(
+        req.params.user_id
+      );
+      return response(res, statusCode, message, data);
+    } catch (error) {
+      console.error("Get user controller error:", error);
+      return response(res, 500, "Something went wrong");
+    }
+  }
+
+  static async getAllInterests(req, res) {
+    try {
+      const { statusCode, message, data } =
+        await OnboardingService.getAllInterests(req.body);
+      return response(res, statusCode, message, data);
+    } catch (error) {
+      console.error("Update controller error:", error);
+      return response(res, 500, "Something went wrong");
+    }
+  }
+
+  static async selectInterest(req, res) {
+    try {
+      const { statusCode, message, data } =
+        await OnboardingService.selectInterests(req.body, req.user);
+      return response(res, statusCode, message, data);
+    } catch (error) {
+      console.error("Update controller error:", error);
+      return response(res, 500, "Something went wrong");
     }
   }
 
   static async updateTripPurpose(req, res) {
     try {
-      const userId = req.user.user_id;
-      const result = await onboardingService.updateTripPurpose(
-        userId,
+      const result = await OnboardingService.updateTripPurpose(
+        req.user.user_id,
         req.body
       );
       return response(res, 200, result.message);
@@ -66,65 +96,15 @@ class OnboardingController {
     }
   }
 
-  static async updatePlannerProfile(req, res) {
-    try {
-      const userId = req.user.user_id;
-      const plannerData = req.body;
-
-      const result = await onboardingService.updatePlannerProfile(
-        userId,
-        plannerData
-      );
-      return response(res, 200, result.message);
-    } catch (error) {
-      console.error("Update planner profile controller error:", error);
-      return response(res, 500, "An unexpected error occurred.");
-    }
-  }
-
-  static async completeOnboarding(req, res) {
-    try {
-      const userId = req.user.user_id;
-      const { statusCode, message, data } = await onboardingService.completeOnboarding(userId);
-      return response(res, statusCode, message, data);
-    } catch (error) {
-      console.error("Complete onboarding controller error:", error);
-      return response(res, 500, "An unexpected error occurred.");
-    }
-  }
-
   static async getUserTypes(req, res) {
     try {
       const { statusCode, message, data } =
-        await onboardingService.getAllUserTypes();
-
+        await OnboardingService.getUserTypes();
       return response(res, statusCode, message, data);
     } catch (error) {
       console.error("Get user types controller error:", error);
-      return errorResponseMsg(res, 500, "An unexpected error occurred.");
-    }
-  }
-
-  static async getInterests(req, res) {
-    try {
-      const { statusCode, message, data } =
-        await onboardingService.getAllInterests();
-      return response(res, statusCode, message, data);
-    } catch (error) {
-      console.error("Get interests controller error:", error);
-      return response(res, 500, "An unexpected error occurred.");
-    }
-  }
-
-  static async getTripPurposes(req, res) {
-    try {
-      const { statusCode, message, data } =
-        await onboardingService.getAllTripPurposes();
-      return response(res, statusCode, message, data);
-    } catch (error) {
-      console.error("Get trip purposes controller error:", error);
       return response(res, 500, "An unexpected error occurred.");
     }
   }
 }
-export default OnboardingController;
+module.exports = OnboardingController;

@@ -1,4 +1,5 @@
 const { AppDataSource } = require("../config/database");
+
 /**
  * Generic seeder for any entity.
  * @param {Entity} entity - TypeORM Entity (e.g., UserType)
@@ -12,6 +13,7 @@ const seedEntity = async (entity, seedData, uniqueKey) => {
     const existing = await repository.findOne({
       where: { [uniqueKey]: item[uniqueKey] },
     });
+
     if (!existing) {
       await repository.save({
         ...item,

@@ -16,7 +16,7 @@ const guard = (req, res, next) => {
       }
     }
     if (decoded && typeof decoded === "object") {
-      req.body = { ...req.body, ...decoded.data };
+      // req.body = { ...req.body, ...decoded.data };
       req.user= decoded.data;
     }
 

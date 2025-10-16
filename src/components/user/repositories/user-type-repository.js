@@ -4,9 +4,13 @@ const { UserType } = require("../../user/entities/user-type");
 class UserTypeRepository {
   _repository = AppDataSource.getRepository(UserType);
   async findAll() {
-    const response = await this._repository.find();
+    const response = await this._repository.find({});
+    return response;
+  }
+  async findById(userTypeId) {
+    const response = await this._repository.findOneBy({ id: userTypeId });
     return response;
   }
 }
 
-export default new UserTypeRepository();
+module.exports = new UserTypeRepository();

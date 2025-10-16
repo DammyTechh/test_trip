@@ -335,7 +335,7 @@ router.post(
   validate(resetPasswordSchema(), "body"),
   authController.resetPassword
 );
-
+ 
 /**
  * @swagger
  * /api/auth/change-password:
@@ -382,6 +382,5 @@ router.patch(
   validate(changePasswordSchema(), "body"),
   authController.changePassword
 );
-
 
 module.exports = router;

@@ -9,4 +9,4 @@ class TripPurposeRepository {
   }
 }
 
-export default new TripPurposeRepository();
+module.exports = new  TripPurposeRepository();

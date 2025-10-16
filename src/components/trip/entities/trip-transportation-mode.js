@@ -2,29 +2,25 @@ const { EntitySchema } = require('typeorm');
 
 const TripTransportationMode = new EntitySchema({
   name: 'TripTransportationMode',
-  tableName: 'trip_transportation_mod',
+  tableName: 'trip_transportation_mode',
   columns: {
-    id: {
-      type: 'int',
-      primary: true,
-      generated: true,
-    },
-    trip_transportation_modcol: {
-      type: 'varchar',
-      length: 100,
+    id: { type: 'uuid', primary: true, generated: 'uuid' },
+    name: { type: 'varchar', length: 100, nullable: false },
+    created_at: { type: 'timestamp', createDate: true },
+    updated_at: { type: 'timestamp', updateDate: true },
+    created_by: { type: 'uuid', nullable: true },
+  },
+  relations: {
+    createdBy: {
+      target: 'User',
+      type: 'many-to-one',
+      joinColumn: { name: 'created_by' },
       nullable: true,
     },
-    created_at: {
-      type: 'datetime',
-      nullable: true,
-    },
-    updated_at: {
-      type: 'datetime',
-      nullable: true,
-    },
-    created_by: {
-      type: 'bigint',
-      nullable: true,
+    trips: {
+      type: 'one-to-many',
+      target: 'Trip',
+      inverseSide: 'transportationMode',
     },
   },
 });

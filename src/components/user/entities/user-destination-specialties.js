@@ -18,7 +18,7 @@ const UserDestinationSpecialties = new EntitySchema({
     users: {
       type: "many-to-one",
       target: "User",
-      JoinColumn: { name: "user_id" },
+      joinColumn: { name: "user_id" },
     },
   },
 });

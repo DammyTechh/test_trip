@@ -27,7 +27,7 @@ const User = new EntitySchema({
     password: {
       type: "varchar",
       length: 255,
-      nullable: false,
+      nullable: true,
     },
     phone_number: {
       type: "varchar",
@@ -69,20 +69,37 @@ const User = new EntitySchema({
       length: 50,
       nullable: true,
     },
-    budget_range: {
-      type: "varchar",
-      length: 50,
+    // budget_range: {
+    //   type: "varchar",
+    //   length: 50,
+    //   nullable: true,
+    // },
+    budget_min: {
+      type: "int",
       nullable: true,
+      default: 0, // optional default
+    },
+    budget_max: {
+      type: "int",
+      nullable: true,
+      default: 0, // optional default
+    },
+    budget_currency: {
+      type: "varchar",
+      nullable: true,
+      length: 10,
+    },
+    planner_currency: {
+      type: "varchar",
+      nullable: true,
+      length: 10,
     },
     trip_purpose: {
       type: "varchar",
       length: 100,
       nullable: true,
     },
-    destination_specialties: {
-      type: "text",
-      nullable: true,
-    },
+
     planning_experience_years: {
       type: "int",
       nullable: true,
@@ -103,18 +120,18 @@ const User = new EntitySchema({
     },
   },
   relations: {
-    userRoles: {
+    user_roles: {
       type: "one-to-many",
       target: "UserRole",
       inverseSide: "user",
       cascade: true,
     },
-    userInterests: {
+    user_interests: {
       target: "UserInterest",
       type: "one-to-many",
       inverseSide: "user",
     },
-    userDestinationSpecialties: {
+    user_destination_specialties: {
       type: "one-to-many",
       target: "UserDestinationSpecialties",
       inverseSide: "user",

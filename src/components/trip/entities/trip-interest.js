@@ -11,7 +11,7 @@ const TripInterest = new EntitySchema({
     created_at: { type: "timestamp", createDate: true },
     updated_at: { type: "timestamp", updateDate: true },
   },
- relations: {
+  relations: {
     trip: {
       type: "many-to-one",
       target: "Trip",

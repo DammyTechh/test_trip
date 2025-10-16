@@ -6,7 +6,18 @@ class UserRepository {
 
   async create(payload) {
     const user = this._repository.create(payload);
-    const response = await this._repository.save(user);
+    const saved = await this._repository.save(user);
+
+    const response = await this._repository.findOne({
+      where: { user_id: saved.user_id },
+      select: {
+        user_id: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+      },
+    });
+
     return response;
   }
 
@@ -24,8 +35,16 @@ class UserRepository {
     return response;
   }
   async findById(user_id) {
-    const response = await this._repository.findOneBy({
-      user_id,
+    const response = await this._repository.findOne({
+      where: { user_id },
+      select: {
+        user_id: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+        password: true
+      },
+      relations: ["user_roles", "user_roles.user_type"],
     });
     return response;
   }
@@ -42,7 +61,8 @@ class UserRepository {
   async findByIdWithRelations(user_id) {
     const user = await this._repository.findOne({
       where: { user_id },
-      relations: ["userType", "userInterests", "userInterests.interest"],
+      // "userInterests", "userInterests.interest"
+      relations: ["user_roles"],
     });
     return user;
   }
@@ -54,8 +74,8 @@ class UserRepository {
     return user;
   }
 
-  async findAll(){
-    const user= await this._repository.find();
+  async findAll() {
+    const user = await this._repository.find();
     return user;
   }
 }

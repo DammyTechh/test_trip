@@ -4,7 +4,7 @@ const UserInterest = new EntitySchema({
   name: "UserInterest",
   tableName: "user_interests",
   columns: {
-    id: { type: "uuid", primary: true },
+    id: { type: "uuid", primary: true, generated: "uuid" },
     created_at: { type: "timestamp", createDate: true },
     updated_at: { type: "timestamp", updateDate: true },
   },
