@@ -10,7 +10,7 @@ const UserRole = new EntitySchema({
   },
   relations: {
     user: {
-      type: 'many-to-one',
+      type: 'one-to-one',
       target: 'User',
       joinColumn: { name: 'user_id' },
       onDelete: 'CASCADE',

@@ -17,7 +17,7 @@ const guard = (req, res, next) => {
     }
     if (decoded && typeof decoded === "object") {
       // req.body = { ...req.body, ...decoded.data };
-      req.user= decoded.data;
+      req.user = decoded.data;
     }
 
     return next();
