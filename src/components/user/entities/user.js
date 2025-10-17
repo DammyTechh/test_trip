@@ -1,6 +1,6 @@
 const { EntitySchema } = require("typeorm");
 const { OnboardingSteps } = require("../../../utils/onboarding-steps");
-
+/** */
 const User = new EntitySchema({
   name: "User",
   tableName: "users",
